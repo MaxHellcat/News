@@ -7,18 +7,21 @@
 //
 
 import UIKit
+import CoreData
 
-// TODO: Decode html entities in background in data manager
-// TODO: Try prefetching
-// TODO: Cache cells' height to avoid jerking while scrolling
-class ItemsViewController: UITableViewController
+fileprivate let kShowContentSegueId = "PushContentPage"
+fileprivate let kTableFooterHeight: CGFloat = 44.0
+fileprivate let kCellIdentifier = "Cell"
+
+class ItemsViewController: UITableViewController, NSFetchedResultsControllerDelegate
 {
 	private var dataManager: DataManager!
+	
+	let cache = Array<CGFloat>()
 
 	let footerView: UIView = {
 		let view = UIView()
-		view.bounds.size.height = 44.0
-//		view.backgroundColor = UIColor.brown
+		view.bounds.size.height = kTableFooterHeight
 
 		let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
 		view.addSubview(activityIndicator)
@@ -35,129 +38,141 @@ class ItemsViewController: UITableViewController
 
 		self.title = "Тинькофф Новости"
 
-//		tableView.rowHeight = UITableViewAutomaticDimension
-//		tableView.estimatedRowHeight = 120.0
-
 		self.dataManager = DataManager() { [unowned self] manager in
 			self.dataManager = manager
-			self.fetchNextNews()
+
+			self.dataManager.fetchedResultsController.delegate = self
+			try! self.dataManager.fetchedResultsController.performFetch() // Feeling lucky?
+
+			self.fetchNextNews(initialFetch: true)
 		}
     }
 
     // MARK: - UITableViewDataSource related
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
 	{
-        return dataManager.items.count
+		return dataManager.fetchedResultsController.sections![section].numberOfObjects
     }
 
-	// https://stackoverflow.com/questions/27996438/jerky-scrolling-after-updating-uitableviewcell-in-place-with-uitableviewautomati
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
 	{
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: kCellIdentifier, for: indexPath)
 
-		updateCell(cell, at: indexPath)
+		let item = dataManager.fetchedResultsController!.object(at: indexPath)
 
-		// Of course some other loading decision can be used, just sticking to a classic approach here
-		if indexPath.item == dataManager.items.count-1 {
-			fetchNextNews()
+		let text = item.text!
+		cell.textLabel!.text = text
+		cell.detailTextLabel!.text = "\(item.contentViewCount)"
+//		cell.detailTextLabel!.text = "\(indexPath.row) / \(item.id) / \(item.timestamp)"
+
+		// Of course some other loading decision can be used, just sticking to the classic approach here
+		if indexPath.item == dataManager.fetchedResultsController.sections![0].numberOfObjects-1 {
+			fetchNextNews(initialFetch: false)
 		}
 
         return cell
     }
+	
+	let attributes = [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 16.0)]
 
 	// MARK: - UITableViewDelegate related
+	
+	// Long battle against totally weird behavior of cells during insertion, keep their height constant for now
+#if false
+	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat
+	{
+		let item = dataManager.fetchedResultsController!.object(at: indexPath)
+
+		let textMaxWidth = tableView.bounds.size.width - 16.0 - 16.0
+
+		let constraintRect = CGSize(width: textMaxWidth, height: CGFloat.greatestFiniteMagnitude)
+
+		let rect = item.text!.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
+
+		let height = 5.0 + rect.size.height + 19.0
+
+		return height
+	}
+#endif
+
 	override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
 	{
-		performSegue(withIdentifier: "PushContentPage", sender: self)
+		performSegue(withIdentifier: kShowContentSegueId, sender: self)
+	}
+
+	// MARK: - NSFetchedResultsControllerDelegate related
+	func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>)
+	{
+		tableView.beginUpdates()
+	}
+
+	func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?)
+	{
+		switch type
+		{
+		case .insert:
+				tableView.insertRows(at: [newIndexPath!], with: .none)
+		case .delete:
+				tableView.deleteRows(at: [indexPath!], with: .none) // Ever called?
+		case .update:
+				tableView.reloadRows(at: [indexPath!], with: .none)
+		case .move:
+			// Somehow sporadically called along with insertRows for the same indexPath
+//			tableView.moveRow(at: indexPath!, to: newIndexPath!)
+			break
+		}
+	}
+
+	func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>)
+	{
+		tableView.endUpdates()
 	}
 
 	// MARK: - Action handlers
 	@IBAction func refreshTriggered(_ sender: Any)
 	{
-		dataManager.resetFetching()
-		self.dataManager.context.reset()
-		self.dataManager.items = []
-		
-		fetchNextNews()
+		fetchNextNews(initialFetch: true)
 	}
 
 	// MARK: - Business logic
-	private func fetchNextNews()
+	private func fetchNextNews(initialFetch: Bool)
 	{
 		tableView.tableFooterView = self.footerView
 
-		self.dataManager.fetchNextItems(){  (success) in
+		dataManager.fetchNextItems(initialFetch: initialFetch){ (success) in
 
 			self.tableView.tableFooterView = nil
 
-			// If we've pulled refresh, remove all data and cells first
-			if self.tableView.refreshControl!.isRefreshing
-			{
+			if self.tableView.refreshControl!.isRefreshing {
 				self.tableView.refreshControl!.endRefreshing()
-
-//				let indexPaths = (0..<self.dataManager.items.count).map() {
-//					return IndexPath(item: $0, section: 0)
-//				}
-//
-//				self.dataManager.items = [] // TODO: Incapsulate
-//				self.tableView.deleteRows(at: indexPaths, with: .none)
-				
-//				self.dataManager.items = []
-//				self.dataManager.context.reset()
-				self.tableView.reloadData()
 			}
 
 			if !success {
 				self.presentErrorAlert("Failed to fetch news.");
-				return
 			}
-
-			// TODO: Need lastFetchedItems here
-//			let indexPaths = (0..<items.count).map() {
-//				return IndexPath(item: self.items.count - items.count + $0, section: 0)
-//			}
-//
-//			UIView.performWithoutAnimation {
-//				self.tableView.insertRows(at: indexPaths, with: .none)
-//			}
-
-			// Just reloading seems to be less jerky
-			self.tableView.reloadData()
 		}
 	}
 
     // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?)
 	{
-		if segue.identifier == "PushContentPage"
+		if segue.identifier == kShowContentSegueId
 		{
 			let viewController = segue.destination as! ContentViewController
 
 			let indexPath = tableView.indexPathForSelectedRow! // Ever nil here? Assuming not
 
-			let item = dataManager.items[indexPath.row]
+			let item = dataManager.fetchedResultsController!.object(at: indexPath)
 
+			// TODO: Decrement later if we actually don't see the content
 			item.contentViewCount += 1
-			dataManager.persist()
-
-			let cell = tableView.cellForRow(at: indexPath)! // Ever nil here? Assuming not
-			updateCell(cell, at: indexPath)
+			dataManager.save()
 
 			// Kick in the trivial dependency injection
 			viewController.dataManager = dataManager
-			viewController.itemId = Int(item.id)
+			viewController.itemId = item.id
 		}
     }
-
-	private func updateCell(_ cell: UITableViewCell, at indexPath: IndexPath)
-	{
-		let item = dataManager.items[indexPath.row]
-
-		let text = item.text!.htmlDecodedLight()
-		cell.textLabel!.text = text
-
-		cell.detailTextLabel!.text = "\(item.contentViewCount)"
-	}
 
 	// MARK: - Memory management
 	override func didReceiveMemoryWarning()

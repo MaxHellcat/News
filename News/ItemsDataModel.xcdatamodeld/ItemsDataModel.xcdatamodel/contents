@@ -8,10 +8,11 @@
         <attribute name="contentViewCount" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="id" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="text" attributeType="String" syncable="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <relationship name="content" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Content" inverseName="item" inverseEntity="Content" syncable="YES"/>
     </entity>
     <elements>
         <element name="Content" positionX="-54" positionY="18" width="128" height="75"/>
-        <element name="Item" positionX="-63" positionY="-18" width="128" height="105"/>
+        <element name="Item" positionX="-63" positionY="-18" width="128" height="120"/>
     </elements>
 </model>

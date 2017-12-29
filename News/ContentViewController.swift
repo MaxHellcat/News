@@ -14,7 +14,7 @@ class ContentViewController: UIViewController
 	let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
 
 	var dataManager: DataManager!
-	var itemId: Int!
+	var itemId: Int64!
 
 	// MARK: - View lifecycle
     override func viewDidLoad()
@@ -29,7 +29,7 @@ class ContentViewController: UIViewController
 	{
 		showActivityIndicator()
 
-		dataManager.fetchItemContent(itemId: itemId) { [weak self] (text) in
+		dataManager.fetchContent(for: itemId) { [weak self] (text) in
 
 			guard let weakSelf = self else { return }
 
@@ -37,7 +37,7 @@ class ContentViewController: UIViewController
 
 			guard let text = text else { weakSelf.presentErrorAlert("Failed to fetch content."); return }
 
-			weakSelf.textLabel.text = text.htmlDecodedLight()
+			weakSelf.textLabel.text = text
 		}
 	}
 

@@ -15,7 +15,6 @@
 		AE2C2CE31FF4172C0002812C /* NewsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CE21FF4172C0002812C /* NewsTests.swift */; };
 		AE2C2CEE1FF418990002812C /* ItemsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CED1FF418990002812C /* ItemsViewController.swift */; };
 		AE2C2CF01FF4193A0002812C /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CEF1FF4193A0002812C /* DataManager.swift */; };
-		AE2C2CF21FF436310002812C /* PaneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CF11FF436310002812C /* PaneView.swift */; };
 		AE2C2CF41FF4374B0002812C /* UIView+Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CF31FF4374B0002812C /* UIView+Constraints.swift */; };
 		AE2C2CF81FF46B450002812C /* String+Decoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CF71FF46B450002812C /* String+Decoding.swift */; };
 		AE2C2CFA1FF480B00002812C /* ContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2C2CF91FF480B00002812C /* ContentViewController.swift */; };
@@ -45,7 +44,6 @@
 		AE2C2CE41FF4172C0002812C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AE2C2CED1FF418990002812C /* ItemsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemsViewController.swift; sourceTree = "<group>"; };
 		AE2C2CEF1FF4193A0002812C /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
-		AE2C2CF11FF436310002812C /* PaneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneView.swift; sourceTree = "<group>"; };
 		AE2C2CF31FF4374B0002812C /* UIView+Constraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Constraints.swift"; sourceTree = "<group>"; };
 		AE2C2CF71FF46B450002812C /* String+Decoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Decoding.swift"; sourceTree = "<group>"; };
 		AE2C2CF91FF480B00002812C /* ContentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewController.swift; sourceTree = "<group>"; };
@@ -123,7 +121,6 @@
 				AE17AD9E1FF5216E0068FFC8 /* Data Manager */,
 				AE109DA01FF5818600489ECE /* View&UseCases */,
 				AE2C2CCD1FF4172C0002812C /* AppDelegate.swift */,
-				AE2C2CF11FF436310002812C /* PaneView.swift */,
 				AE2C2CD11FF4172C0002812C /* Main.storyboard */,
 				AE2C2CD41FF4172C0002812C /* Assets.xcassets */,
 				AE2C2CD61FF4172C0002812C /* LaunchScreen.storyboard */,
@@ -244,7 +241,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AE2C2CF21FF436310002812C /* PaneView.swift in Sources */,
 				AE17ADA31FF522E30068FFC8 /* ItemsDataModel.xcdatamodeld in Sources */,
 				AE2C2CF01FF4193A0002812C /* DataManager.swift in Sources */,
 				AEFF6C611FF4FF4900DBC0BD /* UIViewController+Alert.swift in Sources */,
